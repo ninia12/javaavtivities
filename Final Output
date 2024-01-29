@@ -1,0 +1,142 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+class User {
+    private int userId;
+    private int pin;
+    private String name;
+    private double balance;
+
+    public User(int userId, int pin, String name, double balance) {
+        this.userId = userId;
+        this.pin = pin;
+        this.name = name;
+        this.balance = balance;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getPin() {
+        return pin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposit successful. Updated balance: $" + balance);
+        } else {
+            System.out.println("Invalid amount for deposit.");
+        }
+    }
+
+    public void transfer(User recipient, double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            recipient.deposit(amount);
+            System.out.println("Transfer successful. Updated balance: $" + balance);
+        } else {
+            System.out.println("Invalid amount for transfer.");
+        }
+    }
+}
+
+public class BankingApp {
+    private static Map<Integer, User> users = new HashMap<>();
+    private static User loggedInUser = null;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        initializeUsers();
+
+        while (true) {
+            System.out.println("\nWelcome to the Banking App!");
+            System.out.println("1. Login");
+            System.out.println("2. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    login();
+                    break;
+                case 2:
+                    System.out.println("Exiting the Banking App. Goodbye!");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void initializeUsers() {
+        users.put(412435, new User(412435, 7452, "Chris Sandoval", 32000));
+        users.put(264863, new User(264863, 1349, "Marc Yim", 1000));
+    }
+
+    private static void login() {
+        System.out.print("Enter User ID: ");
+        int userId = scanner.nextInt();
+        System.out.print("Enter PIN: ");
+        int pin = scanner.nextInt();
+
+        User user = users.get(userId);
+        if (user != null && user.getPin() == pin) {
+            loggedInUser = user;
+            showLoggedInMenu();
+        } else {
+            System.out.println("Invalid credentials. Login failed.");
+        }
+    }
+
+    private static void showLoggedInMenu() {
+        while (true) {
+            System.out.println("\nWelcome, " + loggedInUser.getName() + "!");
+            System.out.println("1. Check Balance");
+            System.out.println("2. Cash-in");
+            System.out.println("3. Money Transfer");
+            System.out.println("4. Logout");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.println("Your current balance: $" + loggedInUser.getBalance());
+                    break;
+                case 2:
+                    System.out.print("Enter the amount to deposit: $");
+                    double depositAmount = scanner.nextDouble();
+                    loggedInUser.deposit(depositAmount);
+                    break;
+                case 3:
+                    System.out.print("Enter recipient's User ID: ");
+                    int recipientId = scanner.nextInt();
+                    User recipient = users.get(recipientId);
+                    if (recipient != null) {
+                        System.out.print("Enter the amount to transfer: $");
+                        double transferAmount = scanner.nextDouble();
+                        loggedInUser.transfer(recipient, transferAmount);
+                    } else {
+                        System.out.println("Recipient not found.");
+                    }
+                    break;
+                case 4:
+                    loggedInUser = null;
+                    System.out.println("Logged out successfully.");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
